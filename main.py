@@ -1,7 +1,10 @@
+# streamlit run main.py     ---- to see web site
+
 # Imports required ---
 import streamlit as st
 import sqlite3 as sqlite
 import pandas as pd
+import plotly.express as px
 
 @st.cache_data
 def get_data():
@@ -10,42 +13,56 @@ def get_data():
   return data
 data = get_data()
 
-
-with st.expander("Welcome to the Streamlit Tour! 🎈 About this App"):
-    st.write("""
-         This app will introduce you to the Streamlit Library which
-         helps to build and deploy data driven web apps with ease using Python. 😉
-     """)
 st.title('Sales Dashboard')
 st.write(f"We have {len(data)} datapoints")
 
 choice = st.selectbox("Select a Company", data["company"].unique(),index=0)
-
 new_data = data[data["company"] == choice]
+st.write(new_data.groupby(["cat"])["price"].unique())
 
-st.write(new_data.head())
+#st.write(new_data.head())
+
+choicedemo = st.multiselect("Select demographic", new_data["cat"].unique())
+www = new_data["cat"].isin(choicedemo)
+new_dataa = new_data[www]
+
+choiceprice = st.multiselect("Select price", new_dataa["price"].unique())
+wwa = new_dataa["price"].isin(choiceprice)
+new_data_price = new_dataa[wwa]
+
+st.write(new_data_price.head())
+
+#st.write(new_data.head())
 # st.write(f"Sum of Sales {choice}:")
 # st.write(new_data["price"].sum())
 
-choice = st.multiselect("Select demographic", new_data["cat"].unique())
-www = new_data["cat"].isin(choice)
-new_dataa = new_data[www]
-st.write(new_dataa.head())
-
-
+st.write(f"Volume of Sales {choice}:")
+volum = new_data["price"].count()
+st.write(volum)
 # print the data / week
-st.write(f"Sum of Sales per week {choice}:")
-sumperweek = new_dataa.groupby(["week","cat"])["price"].sum()
-st.write(sumperweek)
+#-----st.write(f"Volume of Sales per week {choice}:")
+sumperweek = new_data.groupby(["week"])["price"].count()
 
+#st.write(sumperweek)
+sumperweek = new_data.groupby(["week"])["price"].count().reset_index()
 
-# plot sales through time
-st.write(f"Sum of Sales {choice}:")
-st.write(new_data["price"].sum())
-st.line_chart(sumperweek,columns=['cat'])
+#revenue
+st.write(f"Revenue of {choice}:")
+revenue = new_data["price"].sum()
+st.write(revenue)
+sumperweekk = new_data.groupby(["week"])["price"].sum()
 
-# add a way to select demographic (young, active and retired)
-#choice = st.selectbox("Select demographic", new_data["cat"].unique(),index=0)
-#new_dataa = new_data[new_data["cat"] == choice]
-#st.write(new_dataa.head())
+#st.write(sumperweek)
+sumperweekk = new_data.groupby(["week"])["price"].sum().reset_index()
 
+# plot volume & revenue through time
+
+tab1, tab2 = st.tabs(["Volume", "Revenue"])
+
+with tab1:
+  figvol = px.line(sumperweek, x="week", y="price", title='Volume through time')
+  st.plotly_chart(figvol)
+
+with tab2:
+  figrev = px.line(sumperweekk, x="week", y="price", title='Revenue through time')
+  st.plotly_chart(figrev)
