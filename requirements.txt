@@ -2,4 +2,4 @@ plotly
 streamlit
 pandas
 numpy
-sqlite
+sqlite3
