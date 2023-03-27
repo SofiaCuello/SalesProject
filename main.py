@@ -2,9 +2,19 @@
 
 # Imports required ---
 import streamlit as st
+import time
 import sqlite3 as sqlite
 import pandas as pd
 import plotly.express as px
+
+
+st.set_page_config(
+    page_title="Sales A",
+    page_icon="✨"
+)
+
+with st.spinner('Wait for it...'):
+    time.sleep(4)
 
 @st.cache_data
 def get_data():
@@ -13,7 +23,8 @@ def get_data():
   return data
 data = get_data()
 
-st.title('Sales Dashboard')
+st.markdown("<h1 style='font-family: Gill Sans Semibold, sans-serif; text-align: center; color: #C26F4D;'>Sales Dashboard</h1>", unsafe_allow_html=True)
+#st.title('Sales Dashboard')
 st.write(f"We have {len(data)} datapoints")
 
 choice = st.selectbox("Select a Company", data["company"].unique(),index=0)
